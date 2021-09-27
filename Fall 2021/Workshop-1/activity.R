@@ -21,33 +21,22 @@
 interested_columns <- c('TEAM', 'CONF', 'YEAR', 'G', 'W', 'X2P_O', 'X3P_O')
 
 
-# Step 4: Find the mean games played, games won, Two-Point Shooting Percentage(X2P_O), 
-# and Three-Point Shooting Percentage ('X3P_O') using the apply() function 
-
-col_to_find_mean <- c('G', 'W', 'X2P_O', 'X3P_O')
 
 
-
-# Step 5: Using the tapply function compute the following
-
-# a) The Average Two-Point Shooting Percentage(2P_O) for each team
-
-# b) The Average Three-Point Shooting Percentage(2P_O) for each year
-
-# c) The Average Two-Point Shooting Percentage(2P_O) for each conference and year
-
-
-# d) Optional/Challenge: 
-# Compute the percentage of games won by each team and then find the average win percentage for each team
+#Optional/Challenge: 
+# Compute the percentage of games won by each team
 
 basketball_shortened$win_perc <- (... / ...) * 100 # fill in the relevant columns (replace the ...)
-win_perc_teams <- tapply(...) # fill in the blank (replace the ...)
-win_perc_teams
 
 
 # Which team has the highest and lowest win percentage over time
 
-# hint: use the sort function on the win_perc_teams variable
+# hint: use the order function on the win_perc variable and index by this order
 
 
 # Ans:
+
+# Bonus Question: Find a dataset on Kaggle that you are interested in, download it and read it into R.
+
+# print out the first 5 rows
+

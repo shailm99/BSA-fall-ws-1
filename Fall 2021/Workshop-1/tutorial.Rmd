@@ -11,8 +11,7 @@ output: html_document
 
 1. Installing R
 2. Basic Data Types in R
-3. The Apply Family of Functions
-4. Finding Data On Kaggle and Reading it Into R
+3. Finding Data On Kaggle and Reading it Into R
 
 ### 1) Installing R and RStudio
 
@@ -267,88 +266,7 @@ df1[2,3] # returns value from 2nd row and 3rd column
 df1[,1] # returns first column, and drops the dataframe structure
 ```
 
-### 3) The Apply Family of Functions
-
-What is an Apply function?
-
-An apply function takes a regular function and applies to all elements within a data structure. 
-
-There are five different apply functions: vapply, apply, tapply, lapply, sapply
-
-We will demonstrate how apply and tapply can be used to explore data easily
-
-**The Apply Function**
-
-This function will allow to perform any computation by multiple rows/columns a lot quicker so it can extremely useful in multi-dimensional data structures
-
-```{r}
-# recall the matrix A
-A
-
-# let's say we want to find the sum of each column 
-# there are two ways we can technically do this 
-
-# the first is to manually subset each column and call the sum() function on the resultant vector 
-
-# e.g.
-first_col_A <- A[,1] # using subseting to get the first column of A
-sum(first_col_A)
-
-second_col_A <- A[,2]
-sum(second_col_A)
-
-third_col_A <- A[,3]
-sum(third_col_A)
-
-# This obviously very inefficent and imagine how long this would take us we had 10+ columns of data
-
-# Luckily the apply function can allow us to 'apply' the sum function to all the columns in a single line of code
-apply(A, MARGIN = 2, sum) 
-```
-
-The apply function requires 3 arguments `apply(X, MARGIN, FUNC)`. 
-
-`X` is the multi-dimensional structure you want to apply the function to
-
-`MARGIN` is the level or axis you want to apply the function on (1 for ROW, 2 for COLUMN)
-
-`FUNC` is the function you want to apply 
-
-For example if we want to find the row-wise mean of A we do the following:
-
-```{r}
-apply(A, MARGIN = 1, mean) # we will get a vector where the first element is the mean of the first row and the second element is the mean of the second row
-```
-
-
-**Using a Tapply function for EDA**
-
-Apart from performing quick computations and explorations using the apply function, the `tapply()` function is one my favorites when it comes to discovering trends/patterns/insights from a data set 
-
-Let's see how this function works!
-
-```{r}
-library(datasets) # easy way of loading datasets
-head(iris) 
-# let's say we want to find the average sepal width for each species 
-# using the tapply function we can easily do this
-tapply(iris$Sepal.Width, iris$Species, mean) # we can see that the setosa species tend to have a longer sepal width than versicolor and virginca
-```
-Using the t-apply function, we can see that the Setosa species tend to have a longer sepal width than Versicolor and Virginca. 
-
-So now that you have seen the functionality of the t-apply function let's go over how you can use/call it. 
-
-The general format is: `tapply(X, index, function)`
-
-`X` refers to the vector you will be applying the function to 
-
-`index` refers to what you will splitting the data by before applying the function (the index can be multiple vectors in a list as well)
-
-`function` refers to the function you will applying after splitting the data.
-
-The t-apply function can take some time to get your head around but the best way to learn and understand how it works is to use it in practice to explore and find insights from your data. 
-
-### 4) Finding data on Kaggle and Reading it into R
+### 3) Finding data on Kaggle and Reading it into R
 
 What is Kaggle?
 
@@ -373,10 +291,6 @@ head(df) # this functions shows the first 5 rows of the data
 
 table(df$Medal) # the table functions takes in a vector and summarise the value counts for the vector 
 
-
-# Using the tapply function to find the amount of medals won by each country
-
-tapply(df$Medal, df$Country, table)
 
 ```
 
