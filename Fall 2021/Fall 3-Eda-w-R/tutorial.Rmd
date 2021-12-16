@@ -1,0 +1,332 @@
+---
+title: "Tutorial"
+author: "Shail Mirpuri (704904548)"
+date: "10/23/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Tutorial: Basic Exploratory Data Analysis In R
+
+## Recap from Last Time 
+
+Previously we covered basic data-types, data structures and how they work on a high level in R. 
+
+We also introduced how to find data on websites such as Kaggle. 
+
+Today we will be going one step further and actually exploring datasets to answer some interesting questions!
+
+## Overview 
+
+1. What is Vectorization in R?
+2. The Apply Family of Functions
+3. The Tidyverse Series of Packages
+4. Using Dplyr to explore data
+
+### 1) What is Vectorization in R?
+
+In R, most functions are vectorized, which means that when you apply them to a vector the function will operate on all elements within the vectors. 
+
+This means you do not need to use a loop at apply the function to each element within the vector. In fact using vectorization is a lot quicker than if you did the same operation using a loop. 
+
+
+```{r}
+
+# example of a loop and vectorization and the time difference 
+
+g <- rnorm(100000)
+g_plus_4 <- numeric(100000)
+
+# Start the clock!
+ptm <- proc.time()
+
+# Loop through the vector, adding one
+for (i in 1:100000){
+	g_plus_4[i] <- g[i] + 4
+}
+
+# Stop the clock
+proc.time() - ptm
+
+# Vectorized method is much quicker
+ptm <- proc.time()
+g_plus_4 <- g + 4
+proc.time() - ptm
+```
+
+In general, most things can be done using vectorization and you should only use loops if:
+
+1) The order of your operations matter (i.e. the third element depends on the second element which depends on the first etc.)
+
+
+2) It is much easier to do it using a loop rather than trying to figure out the vectorized approach. 
+
+Some functions in R are not directly vectorized but we still may want to apply them to several elements separately. This is where the apply family of functions comes into play.
+
+For example the `isTrue` function. 
+
+```{r}
+isTRUE(c(TRUE,FALSE,FALSE)) # returns only one value 
+
+# using apply (vapply) we can apply this function to all elements
+
+vapply(X = c(TRUE,FALSE,FALSE), FUN = isTRUE, FUN.VALUE = logical(1))
+```
+
+### 2) The Apply Family of Functions
+
+What is an Apply function?
+
+An apply function takes a regular function and applies to all elements within a data structure. 
+
+There are five different apply functions: vapply, apply, tapply, lapply, sapply
+
+We will demonstrate how apply and tapply can be used to explore data easily
+
+**The Apply Function**
+
+This function will allow to perform any computation by multiple rows/columns a lot quicker so it can extremely useful in multi-dimensional data structures
+
+```{r}
+# recall the matrix A
+A <- matrix(1:6, nrow = 2, ncol = 3)
+A
+# let's say we want to find the sum of each column 
+# there are two ways we can technically do this 
+
+# the first is to manually subset each column and call the sum() function on the resultant vector 
+
+# e.g.
+first_col_A <- A[,1] # using subseting to get the first column of A
+sum(first_col_A)
+
+second_col_A <- A[,2]
+sum(second_col_A)
+
+third_col_A <- A[,3]
+sum(third_col_A)
+
+# This obviously very inefficent and imagine how long this would take us we had 10+ columns of data
+
+# Luckily the apply function can allow us to 'apply' the sum function to all the columns in a single line of code
+apply(A, MARGIN = 2, sum) 
+```
+
+The apply function requires 3 arguments `apply(X, MARGIN, FUNC)`. 
+
+`X` is the multi-dimensional structure you want to apply the function to
+
+`MARGIN` is the level or axis you want to apply the function on (1 for ROW, 2 for COLUMN)
+
+`FUNC` is the function you want to apply 
+
+For example if we want to find the row-wise mean of A we do the following:
+
+```{r}
+apply(A, MARGIN = 1, mean) # we will get a vector where the first element is the mean of the first row and the second element is the mean of the second row
+```
+
+
+**Using a Tapply function for EDA**
+
+Apart from performing quick computations and explorations using the apply function, the `tapply()` function is one my favorites when it comes to discovering trends/patterns/insights from a data set 
+
+Let's see how this function works!
+
+```{r}
+library(datasets) # easy way of loading datasets
+head(iris) 
+# let's say we want to find the average sepal width for each species 
+# using the tapply function we can easily do this
+tapply(iris$Sepal.Width, iris$Species, mean) # we can see that the setosa species tend to have a longer sepal width than versicolor and virginca
+```
+Using the t-apply function, we can see that the Setosa species tend to have a longer sepal width than Versicolor and Virginca. 
+
+So now that you have seen the functionality of the t-apply function let's go over how you can use/call it. 
+
+The general format is: `tapply(X, index, function)`
+
+`X` refers to the vector you will be applying the function to 
+
+`index` refers to what you will splitting the data by before applying the function (the index can be multiple vectors in a list as well)
+
+`function` refers to the function you will applying after splitting the data.
+
+Essentially, t-apply applies a specific function separately to different groups, which makes it very useful in finding underlying trends between groups. 
+
+The t-apply function can take some time to get your head around but the best way to learn and understand how it works is to use it in practice to explore and find insights from your data. 
+
+In this tutorial we will be using the olympics dataset from Kaggle to demonstrate how we can use the apply and tapply functions that we have learned to gain insight about this data. 
+
+Loading CSV data into R:
+
+```{r}
+df <- read.csv('olympics.csv') # make sure that the csv file is in your working directory if you want refer to it by filename
+head(df) # this functions shows the first 5 rows of the data
+```
+
+
+```{r}
+# counting the number of bronze, silver and gold medals in our dataset
+
+table(df$Medal) # the table functions takes in a vector and summarise the value counts for the vector 
+
+
+# Using the tapply function to find the amount of medals won by each country
+
+tapply(df$Medal, df$Country, table)
+
+```
+
+
+### 3) The Tidyverse Series of Packages
+
+The tidyverse is a collection of packages used in R for data processing. 
+
+These packages expect your data to follow the 'tidy' format, which essentially is dictated by three key rules:
+
+1. Every column is a variable
+
+2. Every row is an observation 
+
+3. Every cell contains a single value 
+
+There are several tidyverse packages that you may have heard of, each of these have different purposes. 
+
+We will focus on using Dpylr to explore your data easily in R. 
+
+
+### 4) Using Dplyr to explore data
+
+When exploring data, it always helpful to have questions you want to answer or explore so you know how to go about your exploratory analysis. 
+
+Sometimes its fine to just experiment and explore the data with no real structure as this can lead you to discovering something interesting which you can dig deeper into with your analysis. 
+
+Dplyr allows you to explore data easily. 
+
+The first step to work with it is to load the package
+
+```{r}
+# install.packages('tidyverse') # run this command if you do not have tidyverse installed on your computer
+library(tidyverse) # alternatively you can just load up dplyr using 'library(dplyr)'
+```
+
+
+```{r}
+fifa <- read.csv('players_20.csv')
+dim(fifa) # we have a lot of columns to work with
+colnames(fifa)
+```
+
+#### Different Functionalities of Dplyr
+
+1) `select()` - this picks variables based upon their names by columns
+
+`select(data, ...)` essentially takes in the dataframe as the first argument and then rest of the arguments represent the column names you want to select.  
+
+```{r}
+select(fifa,nationality, dob, age, height_cm, weight_kg) %>% slice(1:10)
+
+```
+
+You can also use the pipe which is ` %>% ` and can be generated by holding CMD + SHIFT + M.
+
+The pipe essentially passes the variable on the left as the first argument in the function on the right. 
+
+```{r}
+fifa %>% select(nationality, dob, age, height_cm, weight_kg) %>% slice(1:10)
+```
+You can chain these pipes together to run multiple commands together
+
+```{r}
+fifa %>% select(dob, age, height_cm, weight_kg) %>% select(age) %>% slice(1:10)
+```
+
+
+
+Other things you can do with select:
+
+```{r}
+fifa %>% select(dob:weight_kg) %>% slice(1:10) # use the colon to select all columns between dob and weight_kg
+
+fifa %>% select(-dob, -weight_kg) %>% slice(1:10) # use the negative sign to select all columns EXCEPT dob and weight_kg
+```
+
+
+There are also some special selection functions:
+
+- `contains()` selects columns containing a specified character string
+- `starts_with()` and `ends_with()`
+- `matches()` selects a column that matches a REGEX pattern
+- `everything()` selects all columns
+- `num_range()` selects columns from a range 
+- `one_of(vector of col names)` select columns where the names are stored in a vector
+
+```{r}
+fifa %>% select(starts_with('attacking')) %>% slice_sample(n = 5) # randomly selects 5 rows
+```
+
+
+
+2) `filter()` allows you to filter certain rows using logical subsetting. 
+
+```{r}
+# lets say we want rows which players have a height of above 175cm AND weight above 85 kg 
+fifa %>% filter(height_cm > 175, weight_kg > 85) %>% select(long_name)  %>% slice_sample(n = 5)
+
+# we can also find rows in which players have height above 175cm OR weight above 85
+fifa %>% filter(height_cm > 175 | weight_kg > 85) %>% select(long_name)  %>% slice_sample(n = 5)
+```
+
+
+
+3) `arrange()` allows you to order by column values
+
+```{r}
+# by default R arranges by ascending so you need to use the DESC() function to arrange by descending
+fifa %>% select(long_name, age) %>% arrange(desc(age), long_name)  %>% slice(1:10)
+
+fifa %>% select(long_name, age) %>% arrange(long_name, desc(age)) %>% slice(1:10)  # note that the order matters
+
+```
+
+
+4) `mutate()` allows you to create new variables 
+
+```{r}
+fifa %>% mutate(overall_value = 0.5 * (value_eur + wage_eur)) %>%  select(overall_value) %>% slice(1:10)
+
+```
+
+There are several useful functions you can use within mutate:
+
+- `pmin()` and `pmax()` takes in multiple column names and returns the minimum/maximum value between all those columns for each row
+- `cummin()` and `cummax()` Cumulative min/max 
+- `cumsum()`, `cumprod()`, `cummean()`
+- `between()` can be used to see if values in a column are between `a` and `b`
+- `lead()` and `lag()` copies values with an offset (more useful in time series data)
+- `ntile()` - bins values into n buckets
+
+
+5) `summarise()` allows you to create summary values for your table
+
+```{r}
+fifa  %>% summarise(mean_age = mean(age), mean_height = mean(height_cm), maxmimum_weight = max(weight_kg))
+```
+
+
+
+6) `group_by()` allows you explore how summary statistics vary between each group (group by usually needs to be combined with a `summarise()` command that tells R how to aggregate the neccessary data)
+
+```{r}
+fifa %>% group_by(nationality) # nothing happens unless you call the summary function
+fifa %>% group_by(nationality) %>% summarise(mean_age = mean(age), mean_height = mean(height_cm), maxmimum_weight = max(weight_kg), number_of_players = n()) %>% filter(number_of_players > 20) %>% arrange(desc(mean_height))
+```
+
+
+
+You can also group by multiple columns:
+```{r}
+fifa %>% group_by(nationality, team_position) %>% summarise(mean_age = mean(age), mean_height = mean(height_cm), maxmimum_weight = max(weight_kg), number_of_players = n()) %>% filter(number_of_players > 20, team_position != 'GK') %>% arrange(mean_height)
+```
